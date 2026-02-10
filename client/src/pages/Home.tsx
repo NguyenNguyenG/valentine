@@ -18,22 +18,22 @@ export default function Home() {
   const [noButtonPosition, setNoButtonPosition] = useState({ x: 0, y: 0 });
   const [showConfetti, setShowConfetti] = useState(false);
   const noButtonRef = useRef<HTMLButtonElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonsContainerRef = useRef<HTMLDivElement>(null);
 
   // Handle "No" button evasion
   const handleNoHover = () => {
-    if (!containerRef.current || !noButtonRef.current) return;
+    if (!buttonsContainerRef.current || !noButtonRef.current) return;
 
-    const container = containerRef.current.getBoundingClientRect();
+    const container = buttonsContainerRef.current.getBoundingClientRect();
     const button = noButtonRef.current.getBoundingClientRect();
 
-    // Calculate safe boundaries (keep button within viewport)
-    const maxX = container.width - button.width - 40;
-    const maxY = container.height - button.height - 40;
+    // Calculate safe boundaries (keep button within the buttons container)
+    const maxX = container.width - button.width - 20;
+    const maxY = container.height - button.height - 20;
 
-    // Generate random position
-    const newX = Math.random() * maxX;
-    const newY = Math.random() * maxY;
+    // Generate random position within safe boundaries
+    const newX = Math.max(0, Math.random() * maxX);
+    const newY = Math.max(0, Math.random() * maxY);
 
     setNoButtonPosition({ x: newX, y: newY });
   };
@@ -73,7 +73,6 @@ export default function Home() {
 
   return (
     <div 
-      ref={containerRef}
       className="relative min-h-screen overflow-hidden flex items-center justify-center"
       style={{
         backgroundImage: `url('https://private-us-east-1.manuscdn.com/sessionFile/Oj2E92x2ND9evM3iqpYeAA/sandbox/PY7jDcCfw6UcYcW0FnozG5-img-1_1770708374000_na1fn_aGVyby1iYWNrZ3JvdW5k.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvT2oyRTkyeDJORDlldk0zaXFwWWVBQS9zYW5kYm94L1BZN2pEY0NmdzZVY1ljVzBGbm96RzUtaW1nLTFfMTc3MDcwODM3NDAwMF9uYTFmbl9hR1Z5YnkxaVlXTnJaM0p2ZFc1ay5wbmc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=Bx88fVu58AFn3i45kYxA~LETl42cKL6lwNnj0~QnjktBfeQdIkRxbG0RqaikQiQ9S9TKO5IMyJDjZ~SIeZ6FP7XN4Tci7dLUXcGAGKL61eMon3nvlj4DvGm5DfoZTIEr9doEhF0tvAtmCIIL-a96O7h23eB1vKZUFD9BMS-WGJm7IskBVHSyKVJspAK-HFisIgMbUnSRDCgU6CFXtTwXJhTkzbgnygtyN7o9q67zESVN6xT-ePov8lnaAs3eDHILqrJuSaPyFUdqBoRtiYgQSqGV0XUb1IqgGHQ~CGsYHnvXjpT9F-Kmt4u-L9FS~ozd8Xynn0hL15fqKvsl7pRuZQ__')`,
@@ -125,7 +124,10 @@ export default function Home() {
             </div>
 
             {/* Buttons */}
-            <div className="relative flex flex-col sm:flex-row gap-6 justify-center items-center min-h-[120px]">
+            <div 
+              ref={buttonsContainerRef}
+              className="relative flex flex-col sm:flex-row gap-6 justify-center items-center min-h-[200px] w-full max-w-md mx-auto"
+            >
               {/* Yes Button */}
               <Button
                 onClick={handleYesClick}
@@ -142,10 +144,11 @@ export default function Home() {
                 onTouchStart={handleNoHover}
                 variant="outline"
                 size="lg"
-                className="absolute sm:relative bg-white/80 hover:bg-white/90 text-[#8B2635] border-2 border-[#E8B4B8] text-xl px-12 py-6 rounded-full shadow-lg transition-all duration-200 font-medium"
+                className="absolute bg-white/80 hover:bg-white/90 text-[#8B2635] border-2 border-[#E8B4B8] text-xl px-12 py-6 rounded-full shadow-lg font-medium"
                 style={{
-                  transform: `translate(${noButtonPosition.x}px, ${noButtonPosition.y}px)`,
-                  transition: 'transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+                  left: `${noButtonPosition.x}px`,
+                  top: `${noButtonPosition.y}px`,
+                  transition: 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
                 }}
               >
                 No
