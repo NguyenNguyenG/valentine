@@ -20,6 +20,7 @@ export default function Home() {
   const [isMoving, setIsMoving] = useState(false);
   const [noHoverCount, setNoHoverCount] = useState(0);
   const noButtonRef = useRef<HTMLButtonElement>(null);
+  const yesButtonRef = useRef<HTMLButtonElement>(null);
   const buttonsContainerRef = useRef<HTMLDivElement>(null);
   const lastMoveTime = useRef(0);
 
@@ -83,11 +84,17 @@ export default function Home() {
     const maxX = container.width - button.width;
     const maxY = container.height - button.height;
     
-    const minDistance = 150; // Minimum distance from cursor
+    const minDistanceFromCursor = 150; // Minimum distance from cursor
+    const minDistanceFromYes = 120; // Minimum distance from Yes button
     let newX, newY;
     let attempts = 0;
     
-    // Keep trying until we find a position far enough from cursor
+    // Get Yes button position if it exists
+    const yesButton = yesButtonRef.current?.getBoundingClientRect();
+    const yesButtonCenterX = yesButton ? (yesButton.left - container.left + yesButton.width / 2) : -1000;
+    const yesButtonCenterY = yesButton ? (yesButton.top - container.top + yesButton.height / 2) : -1000;
+    
+    // Keep trying until we find a position far enough from both cursor and Yes button
     do {
       newX = Math.random() * maxX;
       newY = Math.random() * maxY;
@@ -95,13 +102,19 @@ export default function Home() {
       // Calculate distance from cursor to new button center
       const buttonCenterX = newX + button.width / 2;
       const buttonCenterY = newY + button.height / 2;
-      const distance = Math.sqrt(
+      const distanceFromCursor = Math.sqrt(
         Math.pow(buttonCenterX - cursorX, 2) + 
         Math.pow(buttonCenterY - cursorY, 2)
       );
       
-      // If far enough or tried too many times, use this position
-      if (distance > minDistance || attempts > 10) {
+      // Calculate distance from Yes button to new button center
+      const distanceFromYes = Math.sqrt(
+        Math.pow(buttonCenterX - yesButtonCenterX, 2) + 
+        Math.pow(buttonCenterY - yesButtonCenterY, 2)
+      );
+      
+      // If far enough from both or tried too many times, use this position
+      if ((distanceFromCursor > minDistanceFromCursor && distanceFromYes > minDistanceFromYes) || attempts > 20) {
         break;
       }
       attempts++;
@@ -202,6 +215,7 @@ export default function Home() {
             >
               {/* Yes Button */}
               <Button
+                ref={yesButtonRef}
                 onClick={handleYesClick}
                 size="lg"
                 className="bg-[#FF6B7A] hover:bg-[#FF5566] text-white rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 font-medium"
