@@ -21,19 +21,68 @@ export default function Home() {
   const buttonsContainerRef = useRef<HTMLDivElement>(null);
 
   // Handle "No" button evasion
-  const handleNoHover = () => {
+  const handleNoHover = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!buttonsContainerRef.current || !noButtonRef.current) return;
 
     const container = buttonsContainerRef.current.getBoundingClientRect();
     const button = noButtonRef.current.getBoundingClientRect();
 
-    // Calculate safe boundaries (keep button within the buttons container)
-    const maxX = container.width - button.width - 20;
-    const maxY = container.height - button.height - 20;
+    // Get cursor position relative to container
+    const cursorX = e.clientX - container.left;
+    const cursorY = e.clientY - container.top;
 
-    // Generate random position within safe boundaries
-    const newX = Math.max(0, Math.random() * maxX);
-    const newY = Math.max(0, Math.random() * maxY);
+    moveButtonAwayFromPoint(cursorX, cursorY, container, button);
+  };
+
+  // Handle touch events
+  const handleNoTouch = (e: React.TouchEvent<HTMLButtonElement>) => {
+    if (!buttonsContainerRef.current || !noButtonRef.current) return;
+
+    const container = buttonsContainerRef.current.getBoundingClientRect();
+    const button = noButtonRef.current.getBoundingClientRect();
+
+    // Get touch position relative to container
+    const touch = e.touches[0];
+    const cursorX = touch.clientX - container.left;
+    const cursorY = touch.clientY - container.top;
+
+    moveButtonAwayFromPoint(cursorX, cursorY, container, button);
+  };
+
+  // Move button away from a specific point
+  const moveButtonAwayFromPoint = (
+    cursorX: number,
+    cursorY: number,
+    container: DOMRect,
+    button: DOMRect
+  ) => {
+    // Calculate safe boundaries
+    const maxX = container.width - button.width;
+    const maxY = container.height - button.height;
+    
+    const minDistance = 150; // Minimum distance from cursor
+    let newX, newY;
+    let attempts = 0;
+    
+    // Keep trying until we find a position far enough from cursor
+    do {
+      newX = Math.random() * maxX;
+      newY = Math.random() * maxY;
+      
+      // Calculate distance from cursor to new button center
+      const buttonCenterX = newX + button.width / 2;
+      const buttonCenterY = newY + button.height / 2;
+      const distance = Math.sqrt(
+        Math.pow(buttonCenterX - cursorX, 2) + 
+        Math.pow(buttonCenterY - cursorY, 2)
+      );
+      
+      // If far enough or tried too many times, use this position
+      if (distance > minDistance || attempts > 10) {
+        break;
+      }
+      attempts++;
+    } while (true);
 
     setNoButtonPosition({ x: newX, y: newY });
   };
@@ -141,7 +190,7 @@ export default function Home() {
               <Button
                 ref={noButtonRef}
                 onMouseEnter={handleNoHover}
-                onTouchStart={handleNoHover}
+                onTouchStart={handleNoTouch}
                 variant="outline"
                 size="lg"
                 className="absolute bg-white/80 hover:bg-white/90 text-[#8B2635] border-2 border-[#E8B4B8] text-xl px-12 py-6 rounded-full shadow-lg font-medium"
