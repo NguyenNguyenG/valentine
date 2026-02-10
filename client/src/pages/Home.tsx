@@ -18,6 +18,7 @@ export default function Home() {
   const [noButtonPosition, setNoButtonPosition] = useState({ x: 0, y: 0 });
   const [showConfetti, setShowConfetti] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
+  const [noHoverCount, setNoHoverCount] = useState(0);
   const noButtonRef = useRef<HTMLButtonElement>(null);
   const buttonsContainerRef = useRef<HTMLDivElement>(null);
   const lastMoveTime = useRef(0);
@@ -39,6 +40,7 @@ export default function Home() {
 
     lastMoveTime.current = now;
     setIsMoving(true);
+    setNoHoverCount(prev => prev + 1); // Increment hover count
     moveButtonAwayFromPoint(cursorX, cursorY, container, button);
     
     // Re-enable after transition completes
@@ -63,6 +65,7 @@ export default function Home() {
 
     lastMoveTime.current = now;
     setIsMoving(true);
+    setNoHoverCount(prev => prev + 1); // Increment hover count
     moveButtonAwayFromPoint(cursorX, cursorY, container, button);
     
     // Re-enable after transition completes
@@ -201,7 +204,12 @@ export default function Home() {
               <Button
                 onClick={handleYesClick}
                 size="lg"
-                className="bg-[#FF6B7A] hover:bg-[#FF5566] text-white text-xl px-12 py-6 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-110 font-medium"
+                className="bg-[#FF6B7A] hover:bg-[#FF5566] text-white rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 font-medium"
+                style={{
+                  fontSize: `${1.25 + noHoverCount * 0.15}rem`,
+                  padding: `${1.5 + noHoverCount * 0.2}rem ${3 + noHoverCount * 0.3}rem`,
+                  transform: `scale(${1 + noHoverCount * 0.1})`,
+                }}
               >
                 Yes! 💖
               </Button>
