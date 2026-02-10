@@ -17,11 +17,17 @@ export default function Home() {
   const [accepted, setAccepted] = useState(false);
   const [noButtonPosition, setNoButtonPosition] = useState({ x: 0, y: 0 });
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isMoving, setIsMoving] = useState(false);
   const noButtonRef = useRef<HTMLButtonElement>(null);
   const buttonsContainerRef = useRef<HTMLDivElement>(null);
+  const lastMoveTime = useRef(0);
 
   // Handle "No" button evasion
   const handleNoHover = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent rapid re-triggering (cooldown of 500ms)
+    const now = Date.now();
+    if (now - lastMoveTime.current < 500 || isMoving) return;
+
     if (!buttonsContainerRef.current || !noButtonRef.current) return;
 
     const container = buttonsContainerRef.current.getBoundingClientRect();
@@ -31,11 +37,20 @@ export default function Home() {
     const cursorX = e.clientX - container.left;
     const cursorY = e.clientY - container.top;
 
+    lastMoveTime.current = now;
+    setIsMoving(true);
     moveButtonAwayFromPoint(cursorX, cursorY, container, button);
+    
+    // Re-enable after transition completes
+    setTimeout(() => setIsMoving(false), 300);
   };
 
   // Handle touch events
   const handleNoTouch = (e: React.TouchEvent<HTMLButtonElement>) => {
+    // Prevent rapid re-triggering
+    const now = Date.now();
+    if (now - lastMoveTime.current < 500 || isMoving) return;
+
     if (!buttonsContainerRef.current || !noButtonRef.current) return;
 
     const container = buttonsContainerRef.current.getBoundingClientRect();
@@ -46,7 +61,12 @@ export default function Home() {
     const cursorX = touch.clientX - container.left;
     const cursorY = touch.clientY - container.top;
 
+    lastMoveTime.current = now;
+    setIsMoving(true);
     moveButtonAwayFromPoint(cursorX, cursorY, container, button);
+    
+    // Re-enable after transition completes
+    setTimeout(() => setIsMoving(false), 300);
   };
 
   // Move button away from a specific point
@@ -197,7 +217,8 @@ export default function Home() {
                 style={{
                   left: `${noButtonPosition.x}px`,
                   top: `${noButtonPosition.y}px`,
-                  transition: 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+                  transition: 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+                  pointerEvents: isMoving ? 'none' : 'auto'
                 }}
               >
                 No
