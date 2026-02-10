@@ -15,7 +15,7 @@ import { Heart } from "lucide-react";
 
 export default function Home() {
   const [accepted, setAccepted] = useState(false);
-  const [noButtonPosition, setNoButtonPosition] = useState({ x: 0, y: 0 });
+  const [noButtonPosition, setNoButtonPosition] = useState({ x: 200, y: 0 }); // Start offset from Yes button
   const [showConfetti, setShowConfetti] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
   const [noHoverCount, setNoHoverCount] = useState(0);
@@ -23,6 +23,24 @@ export default function Home() {
   const yesButtonRef = useRef<HTMLButtonElement>(null);
   const buttonsContainerRef = useRef<HTMLDivElement>(null);
   const lastMoveTime = useRef(0);
+  const [initialized, setInitialized] = useState(false);
+
+  // Initialize No button position on mount
+  useEffect(() => {
+    if (!initialized && buttonsContainerRef.current && noButtonRef.current && yesButtonRef.current) {
+      const container = buttonsContainerRef.current.getBoundingClientRect();
+      const noButton = noButtonRef.current.getBoundingClientRect();
+      const yesButton = yesButtonRef.current.getBoundingClientRect();
+      
+      // Calculate a safe initial position (to the right of Yes button with spacing)
+      const yesButtonRelativeRight = yesButton.right - container.left;
+      const initialX = Math.min(yesButtonRelativeRight + 20, container.width - noButton.width);
+      const initialY = 0;
+      
+      setNoButtonPosition({ x: initialX, y: initialY });
+      setInitialized(true);
+    }
+  }, [initialized]);
 
   // Handle "No" button evasion
   const handleNoHover = (e: React.MouseEvent<HTMLButtonElement>) => {
